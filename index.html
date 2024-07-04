@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lecture Transcription and Summarization</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      #result {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Upload Lecture Audio</h1>
+    <form id="uploadForm">
+      <input
+        type="file"
+        id="audioFile"
+        name="audio"
+        accept="audio/*"
+        required
+      />
+      <button type="submit">Upload and Process</button>
+    </form>
+    <div id="result" style="display: none">
+      <h2>Abstract Summary</h2>
+      <p id="abstractSummary"></p>
+      <h2>Key Points</h2>
+      <p id="keyPoints"></p>
+      <h2>Adjust Font</h2>
+      <label for="fontSize">Font Size:</label>
+      <input type="number" id="fontSize" value="16" />px
+      <label for="fontColor">Font Color:</label>
+      <input type="color" id="fontColor" value="#000000" />
+      <button id="applyStyles">Apply Styles</button>
+    </div>
+
+    <script>
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData();
+          formData.append(
+            "audio",
+            document.getElementById("audioFile").files[0]
+          );
+
+          const response = await fetch(
+            "http://localhost:8000/generate-summary",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          const result = await response.json();
+
+          if (response.ok) {
+            document.getElementById("abstractSummary").innerText =
+              result.abstract_summary;
+            document.getElementById("keyPoints").innerText = result.key_points;
+            document.getElementById("result").style.display = "block";
+          } else {
+            alert(result.error);
+          }
+        });
+
+      document.getElementById("applyStyles").addEventListener("click", () => {
+        const fontSize = document.getElementById("fontSize").value + "px";
+        const fontColor = document.getElementById("fontColor").value;
+        document.getElementById("abstractSummary").style.fontSize = fontSize;
+        document.getElementById("abstractSummary").style.color = fontColor;
+        document.getElementById("keyPoints").style.fontSize = fontSize;
+        document.getElementById("keyPoints").style.color = fontColor;
+      });
+    </script>
+  </body>
+</html>
