@@ -4,11 +4,7 @@ import tempfile
 from datetime import date
 from dotenv import load_dotenv
 import whisper
-# import language_tool_python
-# from transformers import BartTokenizer, BartForConditionalGeneration, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModel, pipeline
-# import spacy
 from flask import Flask, send_file, request, jsonify
-import os
 from flask_cors import CORS
 import requests
 
@@ -17,40 +13,13 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 load_dotenv()
 
-client = OpenAI(
-     api_key = os.environ.get("OPENAI_API_KEY")
-)
-# openai_key = os.getenv("OPENAI_KEY")
-# openai.api_key = openai_key
-# audio_path = "./audio.mp3"
+openai_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=openai_key)
 
-# summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-
-# model_name = 'facebook/bart-large-cnn'
-# tokenizer = BartTokenizer.from_pretrained(model_name)
-# model = BartForConditionalGeneration.from_pretrained(model_name)
-# tool = language_tool_python.LanguageTool('en-US')
-# nlp = spacy.load("en_core_web_sm")
-
-# transcribing the audio file to raw text
 def transcribe_audio(audio_path):
-        model = whisper.load_model("base")
-        results = model.transcribe(audio_path)
-        # print(results["text"])
-        return(results["text"])
-
-# transcription = transcribe_audio("audio.mp3")
-
-# def meeting_minutes(transcription):
-#     abstract_summary = abstract_summary_extraction(transcription)
-#     print(abstract_summary)
-#     key_points = key_points_extraction(transcription)
-#     print(key_points)
-#     return {
-#         'abstract_summary': abstract_summary,
-#         'key_points': key_points,
-#     }
-
+    model = whisper.load_model("base")
+    results = model.transcribe(audio_path)
+    return results["text"]
 
 def split_text_into_chunks(text, chunk_size=3000):
     chunks = []
@@ -61,7 +30,6 @@ def split_text_into_chunks(text, chunk_size=3000):
         chunks.append(chunk)
         start = end
     return chunks
-
 
 def abstract_summary_extraction(transcription):
     chunks = split_text_into_chunks(transcription)
@@ -107,8 +75,6 @@ def key_points_extraction(transcription):
         key_points.append(response.choices[0].message.content)
 
     return ' '.join(key_points)
-
-# meeting_minutes(transcription);
 
 @app.route('/generate-summary', methods=['POST'])
 def generate_summary():
