@@ -44,17 +44,20 @@
       <button type="submit">Process</button>
     </form>
     <div id="result" style="display: none">
+      <div class="spinner" id="spinner"></div>
       <h2 id="abstractSummaryTitle">Abstract Summary</h2>
       <p id="abstractSummary"></p>
       <h2 id="keyPointsTitle">Key Points</h2>
       <p id="keyPoints"></p>
-      <h2>Adjust Font</h2>
-      <label for="fontSize">Font Size:</label>
-      <input type="number" id="fontSize" value="16" />px
-      <label for="fontColor">Font Color:</label>
-      <input type="color" id="fontColor" value="#000000" />
-      <button id="applyStyles">Apply Styles</button>
-      <div class="spinner" id="spinner"></div>
+
+      <div style="display: flex; justify-content: center">
+        <h2>Adjust Font</h2>
+        <label for="fontSize">Font Size:</label>
+        <input type="number" id="fontSize" value="16" /> px
+        <label for="fontColor">Font Color:</label>
+        <input type="color" id="fontColor" value="#000000" />
+        <button id="applyStyles">Apply Styles</button>
+      </div>
     </div>
 
     <script>
