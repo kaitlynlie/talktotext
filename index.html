@@ -3,13 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lecture Transcription and Summarization</title>
+    <title>Talk to Text</title>
     <style>
       body {
         font-family: Arial, sans-serif;
       }
       #result {
         margin-top: 20px;
+      }
+      .spinner {
+        display: none;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #09f;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        margin-left: 10px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -23,12 +41,12 @@
         accept="audio/*"
         required
       />
-      <button type="submit">Upload and Process</button>
+      <button type="submit">Process</button>
     </form>
     <div id="result" style="display: none">
-      <h2>Abstract Summary</h2>
+      <h2 id="abstractSummaryTitle">Abstract Summary</h2>
       <p id="abstractSummary"></p>
-      <h2>Key Points</h2>
+      <h2 id="keyPointsTitle">Key Points</h2>
       <p id="keyPoints"></p>
       <h2>Adjust Font</h2>
       <label for="fontSize">Font Size:</label>
@@ -36,6 +54,7 @@
       <label for="fontColor">Font Color:</label>
       <input type="color" id="fontColor" value="#000000" />
       <button id="applyStyles">Apply Styles</button>
+      <div class="spinner" id="spinner"></div>
     </div>
 
     <script>
@@ -49,31 +68,47 @@
             document.getElementById("audioFile").files[0]
           );
 
-          const response = await fetch(
-            "http://127.0.0.1:8000/generate-summary",
-            {
-              method: "POST",
-              body: formData,
+          // processing...
+          document.getElementById("spinner").style.display = "block";
+
+          try {
+            const response = await fetch(
+              "http://127.0.0.1:8000/generate-summary",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            const result = await response.json();
+
+            if (response.ok) {
+              document.getElementById("abstractSummary").innerText =
+                result.abstract_summary;
+              document.getElementById("keyPoints").innerText =
+                result.key_points;
+              document.getElementById("result").style.display = "block";
+            } else {
+              alert(result.error);
             }
-          );
-
-          const result = await response.json();
-
-          if (response.ok) {
-            document.getElementById("abstractSummary").innerText =
-              result.abstract_summary;
-            document.getElementById("keyPoints").innerText = result.key_points;
-            document.getElementById("result").style.display = "block";
-          } else {
-            alert(result.error);
+          } catch (error) {
+            alert("Error: " + error.message);
+          } finally {
+            // hide spinner
+            document.getElementById("spinner").style.display = "none";
           }
         });
 
       document.getElementById("applyStyles").addEventListener("click", () => {
         const fontSize = document.getElementById("fontSize").value + "px";
         const fontColor = document.getElementById("fontColor").value;
+        document.getElementById("abstractSummaryTitle").style.fontSize =
+          fontSize;
+        document.getElementById("abstractSummaryTitle").style.color = fontColor;
         document.getElementById("abstractSummary").style.fontSize = fontSize;
         document.getElementById("abstractSummary").style.color = fontColor;
+        document.getElementById("keyPointsTitle").style.fontSize = fontSize;
+        document.getElementById("keyPointsTitle").style.color = fontColor;
         document.getElementById("keyPoints").style.fontSize = fontSize;
         document.getElementById("keyPoints").style.color = fontColor;
       });

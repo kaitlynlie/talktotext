@@ -1,12 +1,9 @@
 import os
 from openai import OpenAI
-import tempfile
-from datetime import date
 from dotenv import load_dotenv
 import whisper
 from flask import Flask, send_file, request, jsonify
 from flask_cors import CORS
-import requests
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
