@@ -22,7 +22,7 @@ client = OpenAI(
 )
 # openai_key = os.getenv("OPENAI_KEY")
 # openai.api_key = openai_key
-audio_path = "./audio.mp3"
+# audio_path = "./audio.mp3"
 
 # summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
