@@ -36,21 +36,26 @@ def abstract_summary_extraction(transcription):
     summaries = []
 
     for chunk in chunks:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            temperature=0,
-            messages=[
-                {"role": "system", "content": "You are a highly skilled AI trained in language comprehension and "
-                                              "summarization. I would like you to read the following text and summarize"
-                                              "it into a concise abstract paragraph. Aim to retain the most important "
-                                              "points, providing a coherent and readable summary that could help a "
-                                              "person understand the main points of the discussion without needing to "
-                                              "read the entire text. Please avoid unnecessary details or tangential "
-                                              "points."},
-                {"role": "user", "content": chunk}
-            ]
-        )
-        summaries.append(response.choices[0].message.content)
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                temperature=0,
+                messages=[
+                    {"role": "system", "content": "You are a highly skilled AI trained in language comprehension and "
+                                                  "summarization. I would like you to read the following text and summarize"
+                                                  "it into a concise abstract paragraph. Aim to retain the most important "
+                                                  "points, providing a coherent and readable summary that could help a "
+                                                  "person understand the main points of the discussion without needing to "
+                                                  "read the entire text. Please avoid unnecessary details or tangential "
+                                                  "points."},
+                    {"role": "user", "content": chunk}
+                ]
+            )
+            summaries.append(response.choices[0].message.content)
+        except Exception as e:
+            # Log the exception
+            print(f"Error in abstract_summary_extraction: {e}")
+            summaries.append("Summary extraction failed")
 
     return ' '.join(summaries)
 
@@ -59,20 +64,25 @@ def key_points_extraction(transcription):
     key_points = []
 
     for chunk in chunks:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            temperature=0,
-            messages=[
-                {"role": "system", "content": "You are a proficient AI with a specialty in distilling information into "
-                                              "key points. Based on the following text, identify and list the main "
-                                              "points that were discussed or brought up. These should be the most "
-                                              "important ideas, findings, or topics that are crucial to the essence of "
-                                              "the discussion. Your goal is to provide a list that someone could read "
-                                              "to quickly understand what was talked about."},
-                {"role": "user", "content": chunk}
-            ]
-        )
-        key_points.append(response.choices[0].message.content)
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                temperature=0,
+                messages=[
+                    {"role": "system", "content": "You are a proficient AI with a specialty in distilling information into "
+                                                  "key points. Based on the following text, identify and list the main "
+                                                  "points that were discussed or brought up. These should be the most "
+                                                  "important ideas, findings, or topics that are crucial to the essence of "
+                                                  "the discussion. Your goal is to provide a list that someone could read "
+                                                  "to quickly understand what was talked about."},
+                    {"role": "user", "content": chunk}
+                ]
+            )
+            key_points.append(response.choices[0].message.content)
+        except Exception as e:
+            # Log the exception
+            print(f"Error in key_points_extraction: {e}")
+            key_points.append("Key points extraction failed")
 
     return ' '.join(key_points)
 
@@ -94,6 +104,8 @@ def generate_summary():
         os.remove(audio_path)
         return jsonify(meeting_minutes_result)
     except Exception as e:
+        # Log the exception
+        print(f"Error generating summary: {e}")
         return jsonify({'error': 'Error generating summary'}), 500
 
 if __name__ == "__main__":
