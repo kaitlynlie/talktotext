@@ -32,7 +32,8 @@
     </style>
   </head>
   <body>
-    <h1>Upload Lecture Audio</h1>
+    <h1>Talk To Text</h1>
+    <h4>Upload Lecture Recording</h4>
     <form id="uploadForm">
       <input
         type="file"
@@ -50,13 +51,17 @@
       <h2 id="keyPointsTitle">Key Points</h2>
       <p id="keyPoints"></p>
 
-      <div style="display: flex; justify-content: center">
+      <div style="display: flex; flex-direction: column">
         <h2>Adjust Font</h2>
-        <label for="fontSize">Font Size:</label>
-        <input type="number" id="fontSize" value="16" /> px
-        <label for="fontColor">Font Color:</label>
-        <input type="color" id="fontColor" value="#000000" />
-        <button id="applyStyles">Apply Styles</button>
+        <div>
+          <label for="fontSize">Font Size:</label>
+          <input type="number" id="fontSize" value="16" /> px
+        </div>
+        <div>
+          <label for="fontColor">Font Color:</label>
+          <input type="color" id="fontColor" value="#000000" />
+        </div>
+        <button id="applyStyles" style="max-width: 200px">Apply Styles</button>
       </div>
     </div>
 
@@ -97,7 +102,7 @@
           } catch (error) {
             alert("Error: " + error.message);
           } finally {
-            // hide spinner
+            // hiding spinner
             document.getElementById("spinner").style.display = "none";
           }
         });
