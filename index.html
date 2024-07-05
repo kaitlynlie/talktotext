@@ -8,6 +8,8 @@
       body {
         font-family: Arial, sans-serif;
         padding: 10px;
+        display: flex;
+        flex-direction: column;
       }
       #result {
         margin-top: 20px;
@@ -89,16 +91,14 @@
         .getElementById("uploadForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
-
-          // Show spinner immediately
-          document.getElementById("spinner").style.display = "block";
-          document.getElementById("result").style.display = "none";
-
           const formData = new FormData();
           formData.append(
             "audio",
             document.getElementById("audioFile").files[0]
           );
+
+          // show spinner
+          document.getElementById("spinner").style.display = "block";
 
           try {
             const response = await fetch(
@@ -123,7 +123,7 @@
           } catch (error) {
             alert("Error: " + error.message);
           } finally {
-            // Hide spinner
+            // hide spinner
             document.getElementById("spinner").style.display = "none";
           }
         });
@@ -138,19 +138,32 @@
 
         document.body.style.backgroundColor = bgColor;
 
-        const elementsToStyle = [
-          document.getElementById("abstractSummaryTitle"),
-          document.getElementById("abstractSummary"),
-          document.getElementById("keyPointsTitle"),
-          document.getElementById("keyPoints"),
-        ];
+        document.getElementById("abstractSummaryTitle").style.fontSize =
+          fontSize;
+        document.getElementById("abstractSummaryTitle").style.color = fontColor;
+        document.getElementById("abstractSummaryTitle").style.fontFamily =
+          fontFamily;
+        document.getElementById("abstractSummaryTitle").style.letterSpacing =
+          letterSpacing;
 
-        elementsToStyle.forEach((element) => {
-          element.style.fontSize = fontSize;
-          element.style.color = fontColor;
-          element.style.fontFamily = fontFamily;
-          element.style.letterSpacing = letterSpacing;
-        });
+        document.getElementById("abstractSummary").style.fontSize = fontSize;
+        document.getElementById("abstractSummary").style.color = fontColor;
+        document.getElementById("abstractSummary").style.fontFamily =
+          fontFamily;
+        document.getElementById("abstractSummary").style.letterSpacing =
+          letterSpacing;
+
+        document.getElementById("keyPointsTitle").style.fontSize = fontSize;
+        document.getElementById("keyPointsTitle").style.color = fontColor;
+        document.getElementById("keyPointsTitle").style.fontFamily = fontFamily;
+        document.getElementById("keyPointsTitle").style.letterSpacing =
+          letterSpacing;
+
+        document.getElementById("keyPoints").style.fontSize = fontSize;
+        document.getElementById("keyPoints").style.color = fontColor;
+        document.getElementById("keyPoints").style.fontFamily = fontFamily;
+        document.getElementById("keyPoints").style.letterSpacing =
+          letterSpacing;
       });
     </script>
   </body>
