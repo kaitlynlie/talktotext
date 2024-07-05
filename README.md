@@ -3,4 +3,4 @@ This website allows students to upload their lecture recordings for automatic su
 
 <br>
 
-<img src="https://github.com/kaitlynlie/talktotext/blob/main/demo.gif" height="400">
+![demo](https://github.com/kaitlynlie/talktotext/assets/87097847/d0a8bcfe-115b-43f0-9296-6815deaba9e8)
