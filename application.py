@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 import whisper
-from flask import Flask, send_file, request, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -50,7 +50,6 @@ def abstract_summary_extraction(transcription):
             )
             summaries.append(response.choices[0].message.content)
         except Exception as e:
-            # Log the exception
             print(f"Error in abstract_summary_extraction: {e}")
             summaries.append("Summary extraction failed")
 
@@ -77,7 +76,6 @@ def key_points_extraction(transcription):
             )
             key_points.append(response.choices[0].message.content)
         except Exception as e:
-            # Log the exception
             print(f"Error in key_points_extraction: {e}")
             key_points.append("Key points extraction failed")
 
@@ -101,7 +99,6 @@ def generate_summary():
         os.remove(audio_path)
         return jsonify(meeting_minutes_result)
     except Exception as e:
-        # Log the exception
         print(f"Error generating summary: {e}")
         return jsonify({'error': 'Error generating summary'}), 500
 
