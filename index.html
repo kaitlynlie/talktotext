@@ -1,132 +1,680 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Talk to Text</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-      #result {
+
+      :root {
+        --bg: #f5f1eb;
+        --surface: #fffdf9;
+        --ink: #1a1612;
+        --ink-muted: #6b6560;
+        --accent: #c8502a;
+        --accent-light: #f5e8e3;
+        --border: #e0d8cf;
+        --radius: 12px;
+      }
+
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        min-height: 100vh;
+        padding: 40px 20px 80px;
+      }
+
+      /* ── Header ── */
+      header {
+        max-width: 720px;
+        margin: 0 auto 48px;
+      }
+      .logo {
+        font-family: "Instrument Serif", serif;
+        font-size: 2rem;
+        color: var(--ink);
+        letter-spacing: -0.02em;
+      }
+      .logo span {
+        color: var(--accent);
+        font-style: italic;
+      }
+      .tagline {
+        margin-top: 6px;
+        font-size: 0.9rem;
+        color: var(--ink-muted);
+        font-weight: 300;
+      }
+
+      /* ── Upload Card ── */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 32px;
+        max-width: 720px;
+        margin: 0 auto 24px;
+      }
+
+      .upload-zone {
+        border: 2px dashed var(--border);
+        border-radius: 10px;
+        padding: 40px 24px;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+        position: relative;
+      }
+      .upload-zone:hover,
+      .upload-zone.dragover {
+        border-color: var(--accent);
+        background: var(--accent-light);
+      }
+      .upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+      }
+      .upload-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        display: block;
+      }
+      .upload-zone p {
+        font-size: 0.95rem;
+        color: var(--ink-muted);
+      }
+      .upload-zone strong {
+        color: var(--accent);
+        font-weight: 500;
+      }
+      #fileName {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        color: var(--ink);
+        font-weight: 500;
+      }
+
+      /* ── Button ── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        border-radius: 8px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition:
+          opacity 0.2s,
+          transform 0.1s;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        margin-top: 20px;
+        width: 100%;
+        justify-content: center;
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .btn-secondary {
+        background: transparent;
+        margin-top: 20px;
+        border: 1px solid var(--border);
+        color: var(--ink-muted);
+        font-size: 0.85rem;
+        padding: 8px 16px;
+      }
+      .btn-secondary:hover {
+        border-color: var(--ink-muted);
+        color: var(--ink);
+      }
+
+      /* ── Error ── */
+      .error-box {
+        display: none;
+        background: #fdf0ed;
+        border: 1px solid #f5c3b5;
+        color: #9b2c10;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        margin-top: 16px;
+      }
+
+      /* ── Progress ── */
+      .progress-wrap {
+        display: none;
         margin-top: 20px;
       }
-      .spinner {
-        display: none;
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        border-left-color: #09f;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        animation: spin 1s linear infinite;
-        margin: 20px auto;
+      .progress-bar-bg {
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
       }
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
+      .progress-bar-fill {
+        height: 100%;
+        background: var(--accent);
+        border-radius: 2px;
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+      .progress-label {
+        font-size: 0.82rem;
+        color: var(--ink-muted);
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .dot-loader span {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: bounce 1.2s infinite ease-in-out;
+      }
+      .dot-loader span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .dot-loader span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes bounce {
+        0%,
+        80%,
         100% {
-          transform: rotate(360deg);
+          transform: translateY(0);
         }
+        40% {
+          transform: translateY(-6px);
+        }
+      }
+
+      /* ── Results ── */
+      #results {
+        display: none;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      .result-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .result-title {
+        font-family: "Instrument Serif", serif;
+        font-size: 1.3rem;
+        letter-spacing: -0.01em;
+      }
+      .result-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .result-body {
+        font-size: 0.95rem;
+        line-height: 1.75;
+        color: var(--ink);
+        white-space: pre-wrap;
+      }
+
+      /* Tabs for transcript */
+      .tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+      }
+      .tab {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        color: var(--ink-muted);
+        border-bottom: 2px solid transparent;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        font-family: "DM Sans", sans-serif;
+        margin-bottom: -1px;
+      }
+      .tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* ── Font Customizer ── */
+      .customizer {
+        margin-top: 12px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        display: none;
+      }
+      .customizer.open {
+        display: block;
+      }
+      .customizer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .customizer label {
+        font-size: 0.78rem;
+        color: var(--ink-muted);
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .customizer input[type="number"],
+      .customizer select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.9rem;
+        background: var(--surface);
+        color: var(--ink);
+      }
+      .customizer input[type="color"] {
+        width: 100%;
+        height: 38px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 2px;
+        cursor: pointer;
+        background: var(--surface);
+      }
+      .customizer-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      /* Fade-in for result cards */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .card.animate {
+        animation: fadeUp 0.4s ease forwards;
+      }
+      .card.animate:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .card.animate:nth-child(3) {
+        animation-delay: 0.2s;
       }
     </style>
   </head>
   <body>
-    <h1>Talk To Text</h1>
-    <h4>Upload Lecture Recording</h4>
-    <form id="uploadForm">
-      <input
-        type="file"
-        id="audioFile"
-        name="audio"
-        accept="audio/*"
-        required
-      />
-      <button type="submit">Process</button>
-    </form>
-    <div id="result" style="display: none">
-      <div class="spinner" id="spinner"></div>
-      <h2 id="abstractSummaryTitle">Abstract Summary</h2>
-      <p id="abstractSummary"></p>
-      <h2 id="keyPointsTitle">Key Points</h2>
-      <p id="keyPoints"></p>
+    <header>
+      <div class="logo">Talk<span>to</span>Text</div>
+      <p class="tagline">
+        Upload a lecture recording - get an instant summary &amp; key points.
+      </p>
+    </header>
 
-      <div style="display: flex; flex-direction: column; gap: 10px">
-        <h2>Adjust Font</h2>
-        <div>
-          <label for="fontSize">Font Size:</label>
-          <input type="number" id="fontSize" value="16" /> px
+    <!-- Upload Card -->
+    <div class="card" id="uploadCard">
+      <div class="upload-zone" id="dropZone">
+        <input type="file" id="audioFile" accept="audio/*" />
+        <span class="upload-icon">🎙️</span>
+        <p><strong>Choose a file</strong> or drag &amp; drop it here</p>
+        <p>MP3, WAV, M4A, OGG, FLAC — up to 100MB</p>
+        <div id="fileName"></div>
+      </div>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <button class="btn btn-primary" id="processBtn" disabled>
+        Process Recording
+      </button>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
         </div>
-        <div>
-          <label for="fontColor">Font Color:</label>
-          <input type="color" id="fontColor" value="#000000" />
+        <div class="progress-label">
+          <span class="dot-loader"
+            ><span></span><span></span><span></span
+          ></span>
+          <span id="progressLabel">Uploading…</span>
         </div>
-        <div>
-          <label for="fontFamily">Font Family:</label>
-          <select id="fontFamily">
-            <option value="Arial">Arial</option>
-            <option value="Courier New">Courier New</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Times New Roman">Times New Roman</option>
-            <option value="Verdana">Verdana</option>
-          </select>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results">
+      <div class="card animate">
+        <div class="tabs">
+          <button class="tab active" data-tab="summary">Summary</button>
+          <button class="tab" data-tab="keypoints">Key Points</button>
+          <button class="tab" data-tab="transcript">Transcript</button>
         </div>
-        <div>
-          <label for="letterSpacing">Letter Spacing:</label>
-          <input type="number" id="letterSpacing" value="0" /> px
+
+        <div class="tab-panel active" id="tab-summary">
+          <div class="result-header">
+            <div class="result-title">Abstract Summary</div>
+            <div class="result-actions">
+              <button
+                class="btn btn-secondary"
+                onclick="copyText('abstractSummary')"
+              >
+                Copy
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="downloadText('abstractSummary', 'summary.txt')"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+          <p class="result-body" id="abstractSummary"></p>
         </div>
-        <div>
-          <label for="bgColor">Background Color:</label>
-          <input type="color" id="bgColor" value="#ffffff" />
+
+        <div class="tab-panel" id="tab-keypoints">
+          <div class="result-header">
+            <div class="result-title">Key Points</div>
+            <div class="result-actions">
+              <button class="btn btn-secondary" onclick="copyText('keyPoints')">
+                Copy
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="downloadText('keyPoints', 'key-points.txt')"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+          <p class="result-body" id="keyPoints"></p>
         </div>
-        <button id="applyStyles" style="max-width: 200px">Apply Styles</button>
+
+        <div class="tab-panel" id="tab-transcript">
+          <div class="result-header">
+            <div class="result-title">Full Transcript</div>
+            <div class="result-actions">
+              <button
+                class="btn btn-secondary"
+                onclick="copyText('transcript')"
+              >
+                Copy
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="downloadText('transcript', 'transcript.txt')"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+          <p class="result-body" id="transcript"></p>
+        </div>
+
+        <!-- Font Customizer (collapsed by default) -->
+        <div style="margin-top: 20px">
+          <button class="btn btn-secondary" id="toggleCustomizer">
+            ⚙ Adjust Appearance
+          </button>
+        </div>
+        <div class="customizer" id="customizer">
+          <div class="customizer-grid">
+            <div>
+              <label>Font Size (px)</label>
+              <input type="number" id="fontSize" value="16" min="10" max="36" />
+            </div>
+            <div>
+              <label>Font Family</label>
+              <select id="fontFamily">
+                <option value="'DM Sans', sans-serif">DM Sans</option>
+                <option value="'Instrument Serif', serif">
+                  Instrument Serif
+                </option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+              </select>
+            </div>
+            <div>
+              <label>Letter Spacing (px)</label>
+              <input
+                type="number"
+                id="letterSpacing"
+                value="0"
+                min="-2"
+                max="10"
+              />
+            </div>
+            <div>
+              <label>Text Color</label>
+              <input type="color" id="fontColor" value="#1a1612" />
+            </div>
+            <div>
+              <label>Background Color</label>
+              <input type="color" id="bgColor" value="#f5f1eb" />
+            </div>
+          </div>
+          <div class="customizer-actions">
+            <button
+              class="btn btn-primary"
+              style="width: auto"
+              id="applyStyles"
+            >
+              Apply
+            </button>
+            <button class="btn btn-secondary" id="resetStyles">Reset</button>
+          </div>
+        </div>
       </div>
     </div>
 
     <script>
-      document
-        .getElementById("uploadForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const formData = new FormData();
-          formData.append(
-            "audio",
-            document.getElementById("audioFile").files[0]
-          );
+      // ── File input & drag/drop ──
+      const dropZone = document.getElementById("dropZone");
+      const audioFile = document.getElementById("audioFile");
+      const processBtn = document.getElementById("processBtn");
+      const fileNameEl = document.getElementById("fileName");
 
-          // show spinner
-          document.getElementById("spinner").style.display = "block";
+      audioFile.addEventListener("change", () => {
+        if (audioFile.files[0]) {
+          fileNameEl.textContent = "📎 " + audioFile.files[0].name;
+          processBtn.disabled = false;
+        }
+      });
 
-          try {
-            const response = await fetch(
-              "http://127.0.0.1:8000/generate-summary",
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+      dropZone.addEventListener("dragleave", () =>
+        dropZone.classList.remove("dragover"),
+      );
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        const file = e.dataTransfer.files[0];
+        if (file) {
+          audioFile.files = e.dataTransfer.files;
+          fileNameEl.textContent = "📎 " + file.name;
+          processBtn.disabled = false;
+        }
+      });
 
-            const result = await response.json();
-
-            if (response.ok) {
-              document.getElementById("abstractSummary").innerText =
-                result.abstract_summary;
-              document.getElementById("keyPoints").innerText =
-                result.key_points;
-              document.getElementById("result").style.display = "block";
-            } else {
-              alert(result.error);
-            }
-          } catch (error) {
-            alert("Error: " + error.message);
-          } finally {
-            // hide spinner
-            document.getElementById("spinner").style.display = "none";
+      // ── Progress simulation ──
+      let progressInterval;
+      function startProgress() {
+        const bar = document.getElementById("progressBar");
+        const label = document.getElementById("progressLabel");
+        const steps = [
+          { pct: 20, text: "Uploading audio…" },
+          { pct: 45, text: "Transcribing with Whisper…" },
+          { pct: 70, text: "Generating summary…" },
+          { pct: 90, text: "Extracting key points…" },
+        ];
+        let i = 0;
+        bar.style.width = "5%";
+        progressInterval = setInterval(() => {
+          if (i < steps.length) {
+            bar.style.width = steps[i].pct + "%";
+            label.textContent = steps[i].text;
+            i++;
           }
+        }, 2500);
+      }
+      function finishProgress() {
+        clearInterval(progressInterval);
+        document.getElementById("progressBar").style.width = "100%";
+        document.getElementById("progressLabel").textContent = "Done!";
+        setTimeout(() => {
+          document.getElementById("progressWrap").style.display = "none";
+        }, 600);
+      }
+
+      // ── Submit ──
+      processBtn.addEventListener("click", async () => {
+        const file = audioFile.files[0];
+        if (!file) return;
+
+        const errorBox = document.getElementById("errorBox");
+        errorBox.style.display = "none";
+        processBtn.disabled = true;
+        processBtn.textContent = "Processing…";
+        document.getElementById("progressWrap").style.display = "block";
+        document.getElementById("results").style.display = "none";
+        startProgress();
+
+        const formData = new FormData();
+        formData.append("audio", file);
+
+        try {
+          const response = await fetch(
+            "http://127.0.0.1:8000/generate-summary",
+            {
+              method: "POST",
+              body: formData,
+            },
+          );
+          const result = await response.json();
+
+          if (response.ok) {
+            document.getElementById("abstractSummary").textContent =
+              result.abstract_summary;
+            document.getElementById("keyPoints").textContent =
+              result.key_points;
+            document.getElementById("transcript").textContent =
+              result.transcript || "(Transcript not available)";
+            finishProgress();
+            document.getElementById("results").style.display = "block";
+            document
+              .getElementById("results")
+              .scrollIntoView({ behavior: "smooth", block: "start" });
+          } else {
+            throw new Error(result.error || "An unknown error occurred.");
+          }
+        } catch (err) {
+          clearInterval(progressInterval);
+          document.getElementById("progressWrap").style.display = "none";
+          errorBox.textContent = "⚠ " + err.message;
+          errorBox.style.display = "block";
+        } finally {
+          processBtn.disabled = false;
+          processBtn.textContent = "Process Recording";
+        }
+      });
+
+      // ── Tabs ──
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab")
+            .forEach((t) => t.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-panel")
+            .forEach((p) => p.classList.remove("active"));
+          tab.classList.add("active");
+          document
+            .getElementById("tab-" + tab.dataset.tab)
+            .classList.add("active");
         });
+      });
+
+      // ── Copy & Download ──
+      function copyText(id) {
+        const text = document.getElementById(id).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = event.target;
+          btn.textContent = "Copied!";
+          setTimeout(() => (btn.textContent = "Copy"), 2000);
+        });
+      }
+      function downloadText(id, filename) {
+        const text = document.getElementById(id).textContent;
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+        a.download = filename;
+        a.click();
+      }
+
+      // ── Customizer ──
+      document
+        .getElementById("toggleCustomizer")
+        .addEventListener("click", () => {
+          document.getElementById("customizer").classList.toggle("open");
+        });
+
+      const resultBodies = () => document.querySelectorAll(".result-body");
 
       document.getElementById("applyStyles").addEventListener("click", () => {
         const fontSize = document.getElementById("fontSize").value + "px";
@@ -137,33 +685,24 @@
         const bgColor = document.getElementById("bgColor").value;
 
         document.body.style.backgroundColor = bgColor;
+        resultBodies().forEach((el) => {
+          el.style.fontSize = fontSize;
+          el.style.color = fontColor;
+          el.style.fontFamily = fontFamily;
+          el.style.letterSpacing = letterSpacing;
+        });
+      });
 
-        document.getElementById("abstractSummaryTitle").style.fontSize =
-          fontSize;
-        document.getElementById("abstractSummaryTitle").style.color = fontColor;
-        document.getElementById("abstractSummaryTitle").style.fontFamily =
-          fontFamily;
-        document.getElementById("abstractSummaryTitle").style.letterSpacing =
-          letterSpacing;
-
-        document.getElementById("abstractSummary").style.fontSize = fontSize;
-        document.getElementById("abstractSummary").style.color = fontColor;
-        document.getElementById("abstractSummary").style.fontFamily =
-          fontFamily;
-        document.getElementById("abstractSummary").style.letterSpacing =
-          letterSpacing;
-
-        document.getElementById("keyPointsTitle").style.fontSize = fontSize;
-        document.getElementById("keyPointsTitle").style.color = fontColor;
-        document.getElementById("keyPointsTitle").style.fontFamily = fontFamily;
-        document.getElementById("keyPointsTitle").style.letterSpacing =
-          letterSpacing;
-
-        document.getElementById("keyPoints").style.fontSize = fontSize;
-        document.getElementById("keyPoints").style.color = fontColor;
-        document.getElementById("keyPoints").style.fontFamily = fontFamily;
-        document.getElementById("keyPoints").style.letterSpacing =
-          letterSpacing;
+      document.getElementById("resetStyles").addEventListener("click", () => {
+        document.body.style.backgroundColor = "";
+        resultBodies().forEach((el) => {
+          el.style.cssText = "";
+        });
+        document.getElementById("fontSize").value = 16;
+        document.getElementById("fontColor").value = "#1a1612";
+        document.getElementById("fontFamily").value = "'DM Sans', sans-serif";
+        document.getElementById("letterSpacing").value = 0;
+        document.getElementById("bgColor").value = "#f5f1eb";
       });
     </script>
   </body>
