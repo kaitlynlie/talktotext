@@ -1,2 +1,12 @@
-# Talk To Text
-This website allows students to upload their lecture recordings for automatic summarization and key point extraction. It comes with customization features, which allows users to adjust font color, size, letter spacing, and more for enhanced visibility.
+# talk to text
+A website for uploading audio and getting transcriptions, summaries, and key points.
+
+Pick an audio file, upload it, and get a readable transcript with a concise abstract summary and key points extracted from your audio. Perfect for lectures, meetings, or any long recordings.
+
+## preview
+<img src="preview.png" width="400">
+
+## about
+A hackathon project that I didn't get the chance to finish.
+
+Currently running on “out of credits” mode, oopsies!
