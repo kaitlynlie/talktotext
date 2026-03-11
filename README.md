@@ -9,4 +9,4 @@ Pick an audio file, upload it, and get a readable transcript with a concise abst
 ## about
 A hackathon project that I didn't get the chance to finish.
 
-Currently running on “out of credits” mode, oopsies!
+I ran out of credits :(
